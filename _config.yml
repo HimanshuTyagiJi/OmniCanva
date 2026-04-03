@@ -1,17 +1,18 @@
-title: StudyCraft
-description: Free & Premium Templates for Students — Resume, PDF, SVG, Image & More
-url: ""
-baseurl: ""
+title: OmniCanva
+description: Free & Premium Templates for Students & Creators
+
+url: "https://himanshutyagiji.github.io"
+baseurl: "/OmniCanva"
 
 author: TyagiMultiTech
 email: your@email.com
 
-# Build
+# Build settings
 markdown: kramdown
 highlighter: rouge
 permalink: /:categories/:title/
 
-# Plugins
+# Plugins (GitHub supported only)
 plugins:
   - jekyll-sitemap
   - jekyll-seo-tag
@@ -30,13 +31,16 @@ defaults:
     values:
       layout: "template"
 
-# Exclude
+# Exclude unnecessary files
 exclude:
   - Gemfile
   - Gemfile.lock
   - node_modules
   - README.md
 
-# Google Sheets Config (change these)
-google_sheet_id: "YOUR_GOOGLE_SHEET_ID"
-google_script_url: "YOUR_APPS_SCRIPT_WEB_APP_URL"
+# Disable theme (important)
+theme: null
+
+# Google Sheets Config (IMPORTANT 🔥)
+google_sheet_id: "PASTE_YOUR_SHEET_ID"
+google_script_url: "PASTE_YOUR_APPS_SCRIPT_URL"
