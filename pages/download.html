@@ -1,1 +1,103 @@
+---
+layout: default
+title: Download
+description: Secure download page
+permalink: /download/
+---
 
+<section class="download-page">
+  <div class="download-box" id="downloadBox">
+    <div class="icon" id="dlIcon">⏳</div>
+    <h2 id="dlTitle">Verifying your link...</h2>
+    <p id="dlDesc">Please wait while we verify your download token.</p>
+
+    <div id="dlContent" style="display:none;">
+      <a href="#" id="dlBtn" class="download-file-btn" download>
+        ⬇️ Download Template
+      </a>
+      <p class="download-expiry" id="dlExpiry"></p>
+    </div>
+
+    <div id="dlError" style="display:none;">
+      <a href="/pages/verify/" class="btn-secondary" style="display:inline-flex; margin-top:8px;">
+        🔄 Verify Again
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+// =========================================================
+const SCRIPT_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL';
+// =========================================================
+
+async function verifyDownloadToken() {
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('token');
+
+  if (!token) {
+    showError('❌ Invalid Link', 'Ye link valid nahi hai. Verify Payment page pe jaao.');
+    return;
+  }
+
+  try {
+    // Validate token format first (basic check)
+    if (token.length < 20) {
+      showError('❌ Invalid Token', 'Token format sahi nahi hai.');
+      return;
+    }
+
+    if (SCRIPT_URL && SCRIPT_URL !== 'YOUR_GOOGLE_APPS_SCRIPT_URL') {
+      const res = await fetch(`${SCRIPT_URL}?action=validateToken&token=${encodeURIComponent(token)}`);
+      const data = await res.json();
+
+      if (data.valid) {
+        showDownload(data.fileUrl, data.fileName, data.expiresAt);
+      } else {
+        showError('⏰ Link Expired', data.message || 'Ye download link expire ho gayi hai. Ek naya link generate karo.');
+      }
+    } else {
+      // DEMO — Script not configured
+      showDemo(token);
+    }
+  } catch(e) {
+    showError('❌ Error', 'Download verify nahi ho paya. Please contact karo.');
+  }
+}
+
+function showDownload(fileUrl, fileName, expiresAt) {
+  document.getElementById('dlIcon').textContent = '✅';
+  document.getElementById('dlTitle').textContent = 'Ready to Download!';
+  document.getElementById('dlDesc').textContent = 'Tera template ready hai. Neeche button pe click karo.';
+
+  const btn = document.getElementById('dlBtn');
+  btn.href = fileUrl;
+  btn.download = fileName || 'template';
+
+  if (expiresAt) {
+    const exp = new Date(expiresAt);
+    document.getElementById('dlExpiry').textContent =
+      `⏰ Link expires: ${exp.toLocaleString('en-IN')}`;
+  }
+
+  document.getElementById('dlContent').style.display = 'block';
+  showToast('✅ Download ready!', 'success');
+}
+
+function showDemo(token) {
+  document.getElementById('dlIcon').textContent = '🛠️';
+  document.getElementById('dlTitle').textContent = 'Setup Pending';
+  document.getElementById('dlDesc').textContent =
+    'Google Apps Script abhi configure nahi hua hai. Setup complete hone ke baad ye automatically kaam karega.';
+  document.getElementById('dlError').style.display = 'block';
+}
+
+function showError(title, msg) {
+  document.getElementById('dlIcon').textContent = '❌';
+  document.getElementById('dlTitle').textContent = title;
+  document.getElementById('dlDesc').textContent = msg;
+  document.getElementById('dlError').style.display = 'block';
+}
+
+verifyDownloadToken();
+</script>
