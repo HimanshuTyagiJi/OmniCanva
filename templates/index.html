@@ -1,1 +1,218 @@
+---
+layout: default
+title: All Templates
+description: Browse free and premium templates — Resume, PDF, SVG, Image & Video
+permalink: /templates/
+---
 
+<section class="section">
+  <div class="section-inner">
+
+    <div class="section-header">
+      <span class="section-label">📁 Template Library</span>
+      <h1 style="font-size:clamp(1.6rem,4vw,2.4rem); font-weight:800;">All Templates</h1>
+      <p>Free aur premium templates — apni category choose karo</p>
+    </div>
+
+    <!-- SEARCH -->
+    <div style="max-width:440px; margin:0 auto 28px; position:relative;">
+      <input type="text" id="searchInput" placeholder="🔍 Search templates..."
+        class="form-input" style="padding-left:16px; font-size:0.92rem;"
+        oninput="filterTemplates()">
+    </div>
+
+    <!-- CATEGORY TABS -->
+    <div class="cat-tabs" id="catTabs">
+      <button class="cat-tab active" data-cat="all" onclick="setCategory('all',this)">
+        <span class="icon">📦</span> All
+      </button>
+      <button class="cat-tab" data-cat="resume" onclick="setCategory('resume',this)">
+        <span class="icon">📄</span> Resume
+      </button>
+      <button class="cat-tab" data-cat="pdf" onclick="setCategory('pdf',this)">
+        <span class="icon">📕</span> PDF
+      </button>
+      <button class="cat-tab" data-cat="svg" onclick="setCategory('svg',this)">
+        <span class="icon">🎨</span> SVG / Icons
+      </button>
+      <button class="cat-tab" data-cat="image" onclick="setCategory('image',this)">
+        <span class="icon">🖼️</span> Image
+      </button>
+      <button class="cat-tab" data-cat="video" onclick="setCategory('video',this)">
+        <span class="icon">🎬</span> Video
+      </button>
+    </div>
+
+    <!-- TYPE FILTER -->
+    <div style="display:flex; gap:10px; justify-content:center; margin-bottom:32px;">
+      <button id="filterAll" class="btn-secondary" style="padding:7px 18px; font-size:0.85rem;" onclick="setType('all',this)">All</button>
+      <button id="filterFree" class="btn-secondary" style="padding:7px 18px; font-size:0.85rem; color:var(--accent3); border-color:var(--free-border);" onclick="setType('free',this)">✨ Free Only</button>
+      <button id="filterPaid" class="btn-secondary" style="padding:7px 18px; font-size:0.85rem; color:var(--gold); border-color:var(--paid-border);" onclick="setType('paid',this)">⭐ Premium</button>
+    </div>
+
+    <!-- RESULTS COUNT -->
+    <p id="resultCount" style="text-align:center; color:var(--text3); font-size:0.85rem; margin-bottom:24px;"></p>
+
+    <!-- GRID -->
+    <div class="template-grid" id="templateGrid"></div>
+
+    <!-- EMPTY STATE -->
+    <div id="emptyState" style="display:none; text-align:center; padding:60px 20px;">
+      <div style="font-size:3rem; margin-bottom:16px;">🔍</div>
+      <h3 style="font-family:'Syne',sans-serif; margin-bottom:8px;">No templates found</h3>
+      <p style="color:var(--text3);">Try a different search or category</p>
+    </div>
+
+  </div>
+</section>
+
+<script>
+// =========================================================
+// TEMPLATE DATA — Yahan apne templates add karo
+// Baad mein Google Sheet se bhi load kar sakte ho
+// =========================================================
+const TEMPLATES = [
+  // RESUME
+  { id:'resume-001', title:'Modern Resume Pro', cat:'resume', type:'free', price:0, emoji:'📄',
+    desc:'ATS-friendly clean resume template. PDF + DOCX format.', tags:['resume','cv','job','ats'] },
+  { id:'resume-002', title:'Creative Resume Dark', cat:'resume', type:'paid', price:29, emoji:'📄',
+    desc:'Bold dark-theme resume for creative professionals.', tags:['resume','dark','creative'] },
+  { id:'resume-003', title:'Student Resume Lite', cat:'resume', type:'free', price:0, emoji:'📄',
+    desc:'Simple resume for freshers and students. Minimal design.', tags:['resume','student','fresher'] },
+  { id:'resume-004', title:'Executive Resume Pack', cat:'resume', type:'paid', price:49, emoji:'📄',
+    desc:'Premium pack with 3 resume styles for senior roles.', tags:['resume','executive','pack'] },
+
+  // PDF
+  { id:'pdf-001', title:'Study Notes Template', cat:'pdf', type:'free', price:0, emoji:'📕',
+    desc:'Structured note-taking PDF for students.', tags:['pdf','notes','study','student'] },
+  { id:'pdf-002', title:'Assignment Cover Page', cat:'pdf', type:'free', price:0, emoji:'📕',
+    desc:'Professional assignment cover page for college/university.', tags:['pdf','assignment','college'] },
+  { id:'pdf-003', title:'Project Report Template', cat:'pdf', type:'paid', price:39, emoji:'📕',
+    desc:'Complete project report template with all sections.', tags:['pdf','project','report','mca','btech'] },
+  { id:'pdf-004', title:'Invoice Template Pack', cat:'pdf', type:'paid', price:29, emoji:'📕',
+    desc:'5 professional invoice templates for freelancers.', tags:['pdf','invoice','freelance','business'] },
+
+  // SVG
+  { id:'svg-001', title:'Education Icon Pack', cat:'svg', type:'free', price:0, emoji:'🎨',
+    desc:'20 free SVG icons for education projects.', tags:['svg','icon','education','free'] },
+  { id:'svg-002', title:'Tech Icon Pack Vol.1', cat:'svg', type:'paid', price:49, emoji:'🎨',
+    desc:'50+ tech SVG icons — programming, devices, apps.', tags:['svg','icon','tech','pack'] },
+  { id:'svg-003', title:'Social Media Icons', cat:'svg', type:'free', price:0, emoji:'🎨',
+    desc:'All major social media platform icons in SVG.', tags:['svg','social','media','icon'] },
+
+  // IMAGE
+  { id:'image-001', title:'YouTube Thumbnail Pack', cat:'image', type:'free', price:0, emoji:'🖼️',
+    desc:'10 editable YouTube thumbnail templates.', tags:['image','youtube','thumbnail'] },
+  { id:'image-002', title:'LinkedIn Banner Set', cat:'image', type:'paid', price:39, emoji:'🖼️',
+    desc:'5 professional LinkedIn profile banner templates.', tags:['image','linkedin','banner','professional'] },
+  { id:'image-003', title:'Instagram Post Pack', cat:'image', type:'paid', price:59, emoji:'🖼️',
+    desc:'20 Instagram post templates — education & motivational.', tags:['image','instagram','social','post'] },
+  { id:'image-004', title:'Certificate Template', cat:'image', type:'free', price:0, emoji:'🖼️',
+    desc:'Printable certificate of completion template.', tags:['image','certificate','print'] },
+
+  // VIDEO
+  { id:'video-001', title:'YouTube Intro Pack', cat:'video', type:'paid', price:99, emoji:'🎬',
+    desc:'5 clean animated YouTube intro templates.', tags:['video','youtube','intro','animation'] },
+  { id:'video-002', title:'Reel Transition Pack', cat:'video', type:'paid', price:79, emoji:'🎬',
+    desc:'10 Instagram/YouTube Shorts transition effects.', tags:['video','reel','transition','shorts'] },
+  { id:'video-003', title:'Outro Template', cat:'video', type:'free', price:0, emoji:'🎬',
+    desc:'Simple subscribe outro for YouTube channels.', tags:['video','outro','youtube','subscribe'] },
+];
+
+let currentCat = 'all';
+let currentType = 'all';
+let searchQuery = '';
+
+// Check URL params for initial category
+const urlCat = new URLSearchParams(window.location.search).get('cat');
+if(urlCat) { currentCat = urlCat; }
+
+function setCategory(cat, btn) {
+  currentCat = cat;
+  document.querySelectorAll('.cat-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  filterTemplates();
+}
+
+function setType(type, btn) {
+  currentType = type;
+  document.querySelectorAll('#filterAll,#filterFree,#filterPaid').forEach(b => {
+    b.style.background = 'var(--surface)';
+    b.style.borderColor = 'var(--border)';
+  });
+  btn.style.background = 'var(--surface2)';
+  filterTemplates();
+}
+
+function filterTemplates() {
+  searchQuery = document.getElementById('searchInput').value.toLowerCase();
+
+  let filtered = TEMPLATES.filter(t => {
+    const catMatch = currentCat === 'all' || t.cat === currentCat;
+    const typeMatch = currentType === 'all' || t.type === currentType;
+    const searchMatch = !searchQuery ||
+      t.title.toLowerCase().includes(searchQuery) ||
+      t.desc.toLowerCase().includes(searchQuery) ||
+      t.tags.some(tag => tag.includes(searchQuery));
+    return catMatch && typeMatch && searchMatch;
+  });
+
+  renderTemplates(filtered);
+}
+
+function renderTemplates(list) {
+  const grid = document.getElementById('templateGrid');
+  const empty = document.getElementById('emptyState');
+  const count = document.getElementById('resultCount');
+
+  count.textContent = `${list.length} template${list.length !== 1 ? 's' : ''} found`;
+
+  if(list.length === 0) {
+    grid.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+
+  empty.style.display = 'none';
+  grid.innerHTML = list.map(t => `
+    <div class="template-card fade-in" onclick="window.location='/template/${t.id}/'">
+      <div class="template-thumb">
+        <div class="template-thumb-placeholder">${t.emoji}</div>
+        <span class="template-type-badge badge-${t.type}">
+          ${t.type === 'free' ? '✨ Free' : '⭐ Premium'}
+        </span>
+        <div class="template-overlay">
+          <div class="template-overlay-btn">
+            ${t.type === 'free' ? '⬇️ Download Free' : `🔓 Get for ₹${t.price}`}
+          </div>
+        </div>
+      </div>
+      <div class="template-info">
+        <h3>${t.title}</h3>
+        <p style="font-size:0.82rem; color:var(--text3); margin:4px 0 10px;">${t.desc}</p>
+        <div class="template-meta">
+          <span class="template-cat">${t.cat.toUpperCase()}</span>
+          <span class="template-price ${t.type === 'free' ? 'price-free' : 'price-paid'}">
+            ${t.type === 'free' ? 'FREE' : '₹' + t.price}
+          </span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  // Fade in
+  setTimeout(() => {
+    document.querySelectorAll('.fade-in').forEach(el => el.classList.add('visible'));
+  }, 50);
+}
+
+// Initial set active tab from URL
+if(urlCat) {
+  document.querySelectorAll('.cat-tab').forEach(b => {
+    b.classList.remove('active');
+    if(b.dataset.cat === urlCat) b.classList.add('active');
+  });
+}
+
+filterTemplates();
+</script>
